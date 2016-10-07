@@ -1,0 +1,21 @@
+{
+  "name": "restaurant-node",
+  "version": "1.0.0",
+  "description": "Proyecto del curso de aplicaciones empresariales",
+  "main": "index.js",
+  "scripts": {
+  	"start": "node ./app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.15.0",
+    "express": "^4.13.4",
+    "bluebird": "^3.3.4",
+    "pg-promise": "^3.2.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.9.1"
+  }
+}
