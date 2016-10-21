@@ -1,6 +1,7 @@
 var express = require("express");
 var bodyParser = require('body-parser');
-var routes = require('./routes');
+var routesRestaurant = require('./routes/routesRestaurant');
+var routesTable = require('./routes/routesTable');
 
 var app = express();
 
@@ -11,6 +12,7 @@ app.listen(app.get('port'), function() {
 });
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use('/', routes);
+app.use('/api/restaurants/', routesRestaurant);
+app.use('/api/tables/',routesTable)
 
 module.exports = app;

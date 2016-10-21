@@ -9,7 +9,7 @@ var connectionString = 'postgres://bqnkffou:qkuC7uBLuCmnH8WAXYIXrYHeFrlSVjs5@elm
 var db = pgp(connectionString);
 
 function getAllRestaurants(req,res,next){
-	db.any('select * from restaurant')
+	db.any('SELECT * FROM restaurant')
 		.then(function(data){
 			res.status(200)
 				.json(data);
@@ -20,7 +20,7 @@ function getAllRestaurants(req,res,next){
 
 function getRestaurantByName(req, res, next) {
   var name = req.params.name;
-  db.any('select * from restaurant where name = $1', name)
+  db.any('SELECT * FROM restaurant WHERE name = $1', name)
     .then(function (data) {
       res.status(200)
         .json(data);
