@@ -5,9 +5,9 @@ var options = {
 };
 
 var pgp = require('pg-promise')(options);
-//NUESTRA BD
+//NUESTRA BD TEST
 var connectionString = 'postgres://ervocumi:b-Btk-9bg5tNtMU41eOnbstc8pd_J5No@elmer.db.elephantsql.com:5432/ervocumi';
-//BD DE PRUEBA
+//BD DE RESTAURANT
 //var connectionString = 'postgres://bqnkffou:qkuC7uBLuCmnH8WAXYIXrYHeFrlSVjs5@elmer.db.elephantsql.com:5432/bqnkffou';
 var db = pgp(connectionString);
 
