@@ -1,7 +1,9 @@
 {
-  "name": "RestaurantExpress",
-  "version": "0.0.0",
+  "name": "restaurant-node",
+  "version": "1.0.0",
   "private": true,
+  "description": "Proyecto del curso de aplicaciones empresariales",
+  "main": "index.js",
   "scripts": {
     "start": "supervisor ./bin/www",
     "test": "./node_modules/.bin/mocha --reporter spec"
