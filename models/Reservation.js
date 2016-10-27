@@ -7,12 +7,6 @@ module.exports = {
 		var reservation_date = req.body.reservation_date;
 		var reservation_duration = parseInt(req.body.reservation_duration);
 		var amount_people = parseInt(req.body.amount_people);
-		console.log(req.body);
-		console.log(client);
-		console.log(table_restaurant);
-		console.log(reservation_date);
-		console.log(reservation_duration);
-		console.log(amount_people);
 	  	db.none('insert into reservation(client, table_restaurant, reservation_date, reservation_duration, amount_people)' +
 	      'values($1, $2, $3, $4, $5)',
 	    [client, table_restaurant, reservation_date, reservation_duration, amount_people])

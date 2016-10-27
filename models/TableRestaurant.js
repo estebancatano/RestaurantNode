@@ -5,7 +5,6 @@ module.exports = {
 		var restaurant = parseInt(req.body.restaurant);
 		var capacity = parseInt(req.body.capacity);
 		var available = req.body.available;
-		console.log(req.body);
 	  	db.none('insert into table_restaurant(restaurant, capacity, available)' +
 	      'values($1, $2, $3)',
 	    [restaurant, capacity, available])
@@ -31,6 +30,18 @@ module.exports = {
 	    .catch(function (err) {
 	      return next(err);
 	    });
-	}
+	},
+	getTablesAvailables: function (req, res, next) {
+	  var restaurant;
+	  restaurant = req.params.idRestaurant;
+	  db.any('select * from table_restaurant where restaurant = $1 and available = true', restaurant)
+	    .then(function (data) {
+	      res.status(200)
+	        .json(data);
+	    })
+	    .catch(function (err) {
+	      return next(err);
+	    });
+	},
 
 };
