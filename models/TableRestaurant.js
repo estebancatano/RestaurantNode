@@ -20,7 +20,7 @@ module.exports = {
 	    });
 	},
 	getTablesByRestaurant: function (req, res, next) {
-	  var restaurant;
+	  var restaurant = 0;
 	  restaurant = req.params.idRestaurant;
 	  db.any('select * from table_restaurant where restaurant = $1', restaurant)
 	    .then(function (data) {
@@ -32,7 +32,7 @@ module.exports = {
 	    });
 	},
 	getTablesAvailables: function (req, res, next) {
-	  var restaurant;
+	  var restaurant = 0;
 	  restaurant = req.params.idRestaurant;
 	  db.any('select * from table_restaurant where restaurant = $1 and available = true', restaurant)
 	    .then(function (data) {
@@ -42,6 +42,6 @@ module.exports = {
 	    .catch(function (err) {
 	      return next(err);
 	    });
-	},
+	}
 
 };
