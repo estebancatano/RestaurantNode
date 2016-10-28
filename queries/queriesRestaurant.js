@@ -23,7 +23,7 @@ function getAllRestaurants(req,res,next){
 
 function getRestaurantByName(req, res, next) {
   var name = req.params.name;
-  db.any('SELECT * FROM restaurant WHERE name = $1', name)
+  db.any('SELECT * FROM restaurant WHERE UPPER(name_restaurant) LIKE $1', '%'.concat(name.toUpperCase()).concat('%'))
     .then(function (data) {
       res.status(200)
         .json(data);
@@ -35,8 +35,9 @@ function getRestaurantByName(req, res, next) {
 
 function getRestaurantByCity(req, res, next){
   var cityName = req.params.cityName;
-  db.any('SELECT res.restaurant_id, res.name, res.address, res.score, res.phone FROM restaurant as res, city as ci WHERE ci.name = $1 and res.city = ci.city_id', cityName)
-    .then(function (data) {
+  //db.any('SELECT res.id_restaurant, res.name_restaurant, res.address, res.score, res.phone FROM restaurant as res, city as ci WHERE ci.name = $1 and res.city = ci.city_id', cityName)
+		db.any('SELECT * FROM restaurant as res, city as ci WHERE UPPER(ci.name_city) LIKE $1 and res.city = ci.id_city', '%'.concat(cityName.toUpperCase()).concat('%'))
+		.then(function (data) {
       res.status(200)
         .json(data);
     })
@@ -45,9 +46,11 @@ function getRestaurantByCity(req, res, next){
     });
 }
 
+/*
+************** Validar HU con PO
 function getRestaurantByScore(req, res, next){
   var score = req.params.score;
-  db.any('SELECT * FROM restaurant WHERE score = $1', score)
+  db.any('SELECT * FROM restaurant WHERE score >= $1 ORDER BY score ASC', score)
     .then(function (data) {
       res.status(200)
         .json(data);
@@ -55,15 +58,16 @@ function getRestaurantByScore(req, res, next){
     .catch(function (err) {
       return next(err);
     });
-
 }
+*/
 
 // Método que busca restaurante por tipo de cocina
 // Retorna información del restaurante y los menús asociados a éste
 function getRestaurantByFoodType(req, res, next){
   var foodType = req.params.foodType;
-  db.any('SELECT res.name, res.address, res.score, res.phone FROM restaurant as res, food_type as ft, food_type_restaurant as ftr WHERE ft.type=$1 AND ft.food_type_id=ftr.food_type AND ftr.restaurant=res.restaurant_id', foodType)
-    .then(function (data) {
+  //db.any('SELECT res.name, res.address, res.score, res.phone FROM restaurant as res, food_type as ft, food_type_restaurant as ftr WHERE ft.type=$1 AND ft.food_type_id=ftr.food_type AND ftr.restaurant=res.restaurant_id', foodType)
+db.any('SELECT * FROM restaurant as res, food_type as ft, food_type_restaurant as ftr WHERE UPPER(ft.type) LIKE $1 AND ft.id_food_type=ftr.food_type AND ftr.restaurant=res.id_restaurant', '%'.concat(foodType.toUpperCase()).concat('%'))
+		.then(function (data) {
       res.status(200)
         .json(data);
     })
@@ -74,9 +78,10 @@ function getRestaurantByFoodType(req, res, next){
 
 function getRestaurantByPriceRange(req, res, next){
   var minValue = parseInt(req.params.min);
-  var maxValue = parseInt(req.params.max);  
+  var maxValue = parseInt(req.params.max);
   console.log(maxValue,minValue);
-    db.any('SELECT res.name, res.address, res.score, res.phone FROM restaurant as res, menu WHERE menu.price >= $1 AND menu.price <= $2 AND menu.restaurant=res.restaurant_id', [minValue,maxValue])
+	//db.any('SELECT res.name, res.address, res.score, res.phone FROM restaurant as res, menu WHERE menu.price >= $1 AND menu.price <= $2 AND menu.restaurant=res.restaurant_id', [minValue,maxValue])
+	db.any('SELECT * FROM restaurant as res, dish WHERE dish.price >= $1 AND dish.price <= $2 AND dish.restaurant=res.id_restaurant', [minValue,maxValue])
     .then(function (data) {
       res.status(200)
         .json(data);
@@ -91,7 +96,7 @@ module.exports={
 	getAllRestaurants: getAllRestaurants,
 	getRestaurantByName: getRestaurantByName,
 	getRestaurantByCity: getRestaurantByCity,
-	getRestaurantByScore: getRestaurantByScore,
+	//getRestaurantByScore: getRestaurantByScore,
 	getRestaurantByFoodType: getRestaurantByFoodType,
 	getRestaurantByPriceRange: getRestaurantByPriceRange
 };
