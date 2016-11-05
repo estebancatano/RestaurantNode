@@ -92,11 +92,39 @@ function getRestaurantByPriceRange(req, res, next){
 }
 
 
+function getRestaurantsByCoordinates(req, res, next){
+  var latitude = parseFloat(req.params.latitude);
+  var longitude = parseFloat(req.params.longitude);
+  console.log(latitude,longitude);
+  /*
+    Se utilizo lña formula de La Formula de Haversine, 
+    para calcular la distancia de un punto a otro por latitud y longitud
+    por defecto trae los resstaurantes que esten a un kilometro a la redonda 
+    se necesitaban 2 constantes que se quemaron en la query 
+    6371 = valor de los jkilometrops d ela tierra 
+    1 = numero de kiolometros a la redonda 
+  */
+
+   db.any('Select * FROM (SELECT res.* , ( 6371 * ACOS(COS( RADIANS($1)) * COS(RADIANS(res.latitude))*COS(RADIANS(res.longitude) - RADIANS($2)) + SIN( RADIANS($3) )* SIN(RADIANS( res.latitude ) ) )) AS distance FROM restaurant AS res ) as t where distance < 1 ORDER BY distance ASC', [latitude,longitude,latitude])
+    .then(function (data) {
+      res.status(200)
+        .json(data);
+    })
+    .catch(function (err) {
+      return next(err);
+    });
+}
+
+
+ 
+
+
 module.exports={
 	getAllRestaurants: getAllRestaurants,
 	getRestaurantByName: getRestaurantByName,
 	getRestaurantByCity: getRestaurantByCity,
 	//getRestaurantByScore: getRestaurantByScore,
 	getRestaurantByFoodType: getRestaurantByFoodType,
-	getRestaurantByPriceRange: getRestaurantByPriceRange
+	getRestaurantByPriceRange: getRestaurantByPriceRange,
+  getRestaurantsByCoordinates: getRestaurantsByCoordinates
 };

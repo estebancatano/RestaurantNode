@@ -8,5 +8,6 @@ router.get('/city/:cityName', dbRestaurant.getRestaurantByCity);
 //router.get('/score/:score', dbRestaurant.getRestaurantByScore);
 router.get('/foodType/:foodType',dbRestaurant.getRestaurantByFoodType);
 router.get('/byprices/:min/:max',dbRestaurant.getRestaurantByPriceRange);
+router.get('/bycoordinates/:latitude/:longitude',dbRestaurant.getRestaurantsByCoordinates);
 
 module.exports = router;
