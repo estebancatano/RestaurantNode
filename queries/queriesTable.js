@@ -76,8 +76,8 @@ function reserveTable(req, res, next) {
 };
 
 function getTablesByRestaurant(req, res, next){
-  var restaurant = req.params.restaurant;
-  db.any('SELECT * FROM table_restaurant as tr WHERE tr.restaurant = $1 AND tr.available = true', restaurant)
+  var franchise = req.params.franchise;
+  db.any('SELECT * FROM table_restaurant as tr WHERE tr.franchise = $1 AND tr.available = true', franchise)
     .then(function(data){
       res.status(200)
         .json(data);
