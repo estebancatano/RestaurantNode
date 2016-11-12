@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var routesRestaurant = require('./routes/routesRestaurant');
 var routesTable = require('./routes/routesTable');
 var routesTest = require('./routes/routesTest');
+var routesDelivery = require('./routes/routesDelivery');
 var cors = require('cors');
 
 var app = express();
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use('/api/restaurants/', routesRestaurant);
 app.use('/api/tables/',routesTable);
 app.use('/api/test/',routesTest);
+app.use('/api/delivery/',routesDelivery);
 app.use(cors());
 
 module.exports = app;
