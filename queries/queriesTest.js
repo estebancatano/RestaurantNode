@@ -18,7 +18,7 @@ var db = pgp(cn);
 function getTest(req,res,next){
 	var table = req.params.table;
 	console.log(table);
-	db.any('SELECT * FROM ' + table)
+	db.any('SELECT * FROM $1~', table)
 		.then(function(data){
 			res.status(200)
 				.json(data);
