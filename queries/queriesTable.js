@@ -6,65 +6,72 @@ var options = {
 
 var pgp = require('pg-promise')(options);
 //NUESTRA TEST
-var connectionString = 'postgres://ervocumi:b-Btk-9bg5tNtMU41eOnbstc8pd_J5No@elmer.db.elephantsql.com:5432/ervocumi';
+var connectionString = 'postgres://nwedvvky:CEhVrCWQ5Rgy48A7ZPoa4EVu8QXbneF5@elmer.db.elephantsql.com:5432/nwedvvky';
+// var connectionString = 'postgres://ervocumi:b-Btk-9bg5tNtMU41eOnbstc8pd_J5No@elmer.db.elephantsql.com:5432/ervocumi';
 //BD DE RESTAURANT
 //var connectionString = 'postgres://bqnkffou:qkuC7uBLuCmnH8WAXYIXrYHeFrlSVjs5@elmer.db.elephantsql.com:5432/bqnkffou';
 var db = pgp(connectionString);
 
 function reserveTable(req, res, next) {
-  // Formato fecha: AAAA-MM-DD HH:MM
-  var client = req.body.client;
-  var table = parseInt(req.body.table);
-  var date = req.body.date;
-  var duration = parseInt(req.body.duration);
-  var amount = parseInt(req.body.amount_people);
-  if (validateClient(client)){
-    res.status(400)
+    // Formato fecha: AAAA-MM-DD HH:MM
+    var user_restaurant = parseInt(req.body.user_restaurant);
+    var table_restaurant = parseInt(req.body.table_restaurant);
+    var date_init = req.body.date_init;
+    var date_end = req.body.date_end;
+    var amount_people = parseInt(req.body.amount_people);
+    var state = 0;
+    validateClient(user_restaurant, function(client){
+        console.log(client);
+    }, res);
+    validateTable(table_restaurant, amount_people, function(table){
+        console.log(table);
+    }, res);
+    db.none('INSERT INTO reservation(user_restaurant, table_restaurant, date_init, date_end,amount_people,state)' +
+      'VALUES($1, $2, TIMESTAMP $3, $4, $5, $6)',
+      [user_restaurant, table_restaurant, date_init, date_end,amount_people,state])
+    .then(function(reservation){
+      res.status(200)
         .json({
-          status: 'Error',
-          message: 'Error de validacion con el cliente'
+          status: 'Exitoso',
+          message: 'Realizada la reserva'
         });
-  }else{
-    if(!validateTable(table,amount)){
+    })
+    .catch(function(error){
       res.status(400)
-        .json({
-          status: 'Error',
-          message: 'Error de validacion con la mesa'
-        });
-    }else{
-      db.none('INSERT INTO reservation(client, table_restaurant, reservation_date, reservation_duration,amount_people)' +
-      'VALUES($1, $2, TIMESTAMP $3, $4, $5)',
-    [client, table, date, duration,amount])
-    .then(function () {
-      res.status(200)
-        .json({
-          status: 'Exitoso',
-          message: 'Realizada la reserva'
-        });
-    })
-    .catch(function (err) {
-      return next(err);
+          .json({
+            status: 'Error',
+            message: 'Error al realzar la reserva'
+          });
     });
-    }
-  
-  }
-  
-  /*
-  db.none('INSERT INTO reservation(client, table_restaurant, reservation_date, reservation_duration,amount_people)' +
-      'VALUES($1, $2, TIMESTAMP $3, $4, $5)',
-    [client, table, date, duration,amount])
-    .then(function () {
-      res.status(200)
-        .json({
-          status: 'Exitoso',
-          message: 'Realizada la reserva'
-        });
-    })
-    .catch(function (err) {
-      return next(err);
+}
+
+function validateClient(client, func, res){
+  db.one('SELECT * FROM user_restaurant WHERE user_restaurant.id_user = $1', client)
+  .then(function(client){
+    func(client);
+  })
+  .catch(function(err){
+    res.status(400)
+    .json({
+      status: 'Error',
+      message: 'Error al encontrar el cliente'
     });
-  */
-};
+  });
+}
+
+function validateTable(table, amount, func, res){
+  db.one('SELECT * FROM table_restaurant as tr WHERE tr.id_table_restaurant = $1', table)
+  .then(function(table){
+    func(table);
+  })
+  .catch(function(err){
+    res.status(400)
+    .json({
+      status: 'Error',
+      message: 'Error al encontrar la mesa'
+    });
+  });
+}
 
 function getTablesByRestaurant(req, res, next){
   var restaurant = req.params.restaurant;
@@ -74,36 +81,6 @@ function getTablesByRestaurant(req, res, next){
         .json(data);
     }).catch(function (err){
       return next(err);
-    });
-}
-
-
-function validateClient(client){
-  db.any('SELECT * FROM client WHERE client.username = $1', client)
-    .then(function(data){
-      if(data.length==0){
-        return false;
-      }else {return true;}
-    }).catch(function (err){
-      return false;
-    });
-};
-
-function validateTable(table,amount){
-  db.any('SELECT * FROM table_restaurant as tr WHERE tr.table_restaurant_id = $1', table)
-    .then(function(data){
-      if(data.length==0){
-        return false;
-      }else {
-        /*if (data[0].available && data[0].capacity >= amount){
-          return true;
-        }else{
-          return false;
-        }*/
-        return true;
-      }
-    }).catch(function (err){
-      return false;
     });
 }
 

@@ -6,7 +6,8 @@ var options = {
 
 var pgp = require('pg-promise')(options);
 //NUESTRA BD TEST
-var connectionString = 'postgres://ervocumi:b-Btk-9bg5tNtMU41eOnbstc8pd_J5No@elmer.db.elephantsql.com:5432/ervocumi';
+var connectionString = 'postgres://nwedvvky:CEhVrCWQ5Rgy48A7ZPoa4EVu8QXbneF5@elmer.db.elephantsql.com:5432/nwedvvky';
+// var connectionString = 'postgres://ervocumi:b-Btk-9bg5tNtMU41eOnbstc8pd_J5No@elmer.db.elephantsql.com:5432/ervocumi';
 //BD DE RESTAURANT
 //var connectionString = 'postgres://bqnkffou:qkuC7uBLuCmnH8WAXYIXrYHeFrlSVjs5@elmer.db.elephantsql.com:5432/bqnkffou';
 var db = pgp(connectionString);
@@ -97,12 +98,12 @@ function getRestaurantsByCoordinates(req, res, next){
   var longitude = parseFloat(req.params.longitude);
   console.log(latitude,longitude);
   /*
-    Se utilizo lña formula de La Formula de Haversine, 
+    Se utilizo lña formula de La Formula de Haversine,
     para calcular la distancia de un punto a otro por latitud y longitud
-    por defecto trae los resstaurantes que esten a un kilometro a la redonda 
-    se necesitaban 2 constantes que se quemaron en la query 
-    6371 = valor de los jkilometrops d ela tierra 
-    1 = numero de kiolometros a la redonda 
+    por defecto trae los resstaurantes que esten a un kilometro a la redonda
+    se necesitaban 2 constantes que se quemaron en la query
+    6371 = valor de los jkilometrops d ela tierra
+    1 = numero de kiolometros a la redonda
   */
 
    db.any('Select * FROM (SELECT res.* , ( 6371 * ACOS(COS( RADIANS($1)) * COS(RADIANS(res.latitude))*COS(RADIANS(res.longitude) - RADIANS($2)) + SIN( RADIANS($3) )* SIN(RADIANS( res.latitude ) ) )) AS distance FROM restaurant AS res ) as t where distance < 1 ORDER BY distance ASC', [latitude,longitude,latitude])
@@ -116,7 +117,7 @@ function getRestaurantsByCoordinates(req, res, next){
 }
 
 
- 
+
 
 
 module.exports={
