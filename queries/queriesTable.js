@@ -11,6 +11,15 @@ var connectionString = 'postgres://nwedvvky:CEhVrCWQ5Rgy48A7ZPoa4EVu8QXbneF5@elm
 //BD DE RESTAURANT
 //var connectionString = 'postgres://bqnkffou:qkuC7uBLuCmnH8WAXYIXrYHeFrlSVjs5@elmer.db.elephantsql.com:5432/bqnkffou';
 var db = pgp(connectionString);
+/*var cn = {
+  host: '138.197.15.163',
+  port: 5454,
+  database: 'restaurant',
+  user: 'postgres',
+  password: '94cbd72b4e4133f3417a61adf9a418b1'
+};
+var db = pgp(cn);*/
+
 
 function reserveTable(req, res, next) {
     // Formato fecha: AAAA-MM-DD HH:MM
@@ -74,8 +83,8 @@ function validateTable(table, amount, func, res){
 }
 
 function getTablesByRestaurant(req, res, next){
-  var restaurant = req.params.restaurant;
-  db.any('SELECT * FROM table_restaurant as tr WHERE tr.restaurant = $1 AND tr.available = true', restaurant)
+  var franchise = req.params.franchise;
+  db.any('SELECT * FROM table_restaurant as tr WHERE tr.franchise = $1 AND tr.available = true', franchise)
     .then(function(data){
       res.status(200)
         .json(data);
