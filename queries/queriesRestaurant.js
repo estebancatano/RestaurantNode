@@ -32,20 +32,33 @@ function getAllRestaurants(req,res,next){
 
 function getRestaurantByName(req, res, next) {
   var name = req.params.name;
-  db.any('SELECT * FROM restaurant WHERE UPPER(name_restaurant) LIKE $1', '%'.concat(name.toUpperCase()).concat('%'))
-    .then(function (data) {
-      res.status(200)
-        .json(data);
-    })
-    .catch(function (err) {
-      return next(err);
-    });
+  if(name === ''){
+    res.status(400)
+        .json({
+          status: 'Falta parametro',
+          message: 'No ha ingresado el nombre del restaurante'
+        });
+  }else{
+    db.any('SELECT * FROM restaurant WHERE UPPER(name_restaurant) LIKE $1', '%'.concat(name.toUpperCase()).concat('%'))
+      .then(function (data) {
+        res.status(200)
+          .json(data);
+      })
+      .catch(function (err) {
+        return next(err);
+      });
+  }
 }
 
+[{"id_franchise":13,"name_franchise":"Restaurante Rafael EMAUS","restaurant":11,"address":"Calle 70 4 65","city":2,
+"phone":"4554138","latitude":6.210293,"longitude":-75.571175,"open_time_week":"10:00:00","close_time_week":"23:00:00",
+"open_time_weekend":"10:00:00","close_time_weekend":"23:00:00","id_city":2,"name_city":"Bogota"}]
 function getRestaurantByCity(req, res, next){
   var cityName = req.params.cityName;
   //db.any('SELECT res.id_restaurant, res.name_restaurant, res.address, res.score, res.phone FROM restaurant as res, city as ci WHERE ci.name = $1 and res.city = ci.city_id', cityName)
-		db.any('SELECT * FROM restaurant as res, city as ci WHERE UPPER(ci.name_city) LIKE $1 and res.city = ci.id_city', '%'.concat(cityName.toUpperCase()).concat('%'))
+		db.any('SELECT fran.id_franchise,fran.name_franchise,fran.address,fran.phone,fran.latitude,fran.longitude,fran.open_time_week,'
+      + 'fran.close_time_week, fran.open_time_weekend,fran.close_time_weekend,ci.id_city,ci.name_city FROM franchise as fran, city as ci '
+      + 'WHERE UPPER(ci.name_city) LIKE $1 and fran.city = ci.id_city', '%'.concat(cityName.toUpperCase()).concat('%'))
 		.then(function (data) {
       res.status(200)
         .json(data);
@@ -106,11 +119,11 @@ function getRestaurantsByCoordinates(req, res, next){
   var longitude = parseFloat(req.params.longitude);
   console.log(latitude,longitude);
   /*
-    Se utilizo lña formula de La Formula de Haversine, 
+    Se utiliza La Formula de Haversine, 
     para calcular la distancia de un punto a otro por latitud y longitud
     por defecto trae los resstaurantes que esten a un kilometro a la redonda 
     se necesitaban 2 constantes que se quemaron en la query 
-    6371 = valor de los jkilometrops d ela tierra 
+    6371 = valor de los kilometrops de la tierra 
     1 = numero de kiolometros a la redonda 
   */
 
