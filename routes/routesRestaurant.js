@@ -7,7 +7,7 @@ router.get('/byName/:name', dbRestaurant.getRestaurantByName);
 router.get('/byCity/:cityName', dbRestaurant.getRestaurantByCity);
 //router.get('/score/:score', dbRestaurant.getRestaurantByScore);
 router.get('/byFoodType/:foodType',dbRestaurant.getRestaurantByFoodType);
-router.get('/byPrices/:min/:max',dbRestaurant.getRestaurantByPriceRange);
+router.get('/byPrice/:min/:max',dbRestaurant.getRestaurantByPriceRange);
 router.get('/byCoordinates/:latitude/:longitude',dbRestaurant.getRestaurantsByCoordinates);
 
 module.exports = router;

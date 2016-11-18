@@ -32,27 +32,16 @@ function getAllRestaurants(req,res,next){
 
 function getRestaurantByName(req, res, next) {
   var name = req.params.name;
-  if(name === ''){
-    res.status(400)
-        .json({
-          status: 'Falta parametro',
-          message: 'No ha ingresado el nombre del restaurante'
-        });
-  }else{
-    db.any('SELECT * FROM restaurant WHERE UPPER(name_restaurant) LIKE $1', '%'.concat(name.toUpperCase()).concat('%'))
+  db.any('SELECT * FROM restaurant WHERE UPPER(name_restaurant) LIKE $1', '%'.concat(name.toUpperCase()).concat('%'))
       .then(function (data) {
         res.status(200)
           .json(data);
       })
       .catch(function (err) {
         return next(err);
-      });
-  }
+  });
 }
 
-[{"id_franchise":13,"name_franchise":"Restaurante Rafael EMAUS","restaurant":11,"address":"Calle 70 4 65","city":2,
-"phone":"4554138","latitude":6.210293,"longitude":-75.571175,"open_time_week":"10:00:00","close_time_week":"23:00:00",
-"open_time_weekend":"10:00:00","close_time_weekend":"23:00:00","id_city":2,"name_city":"Bogota"}]
 function getRestaurantByCity(req, res, next){
   var cityName = req.params.cityName;
   //db.any('SELECT res.id_restaurant, res.name_restaurant, res.address, res.score, res.phone FROM restaurant as res, city as ci WHERE ci.name = $1 and res.city = ci.city_id', cityName)
@@ -88,7 +77,10 @@ function getRestaurantByScore(req, res, next){
 function getRestaurantByFoodType(req, res, next){
   var foodType = req.params.foodType;
   //db.any('SELECT res.name, res.address, res.score, res.phone FROM restaurant as res, food_type as ft, food_type_restaurant as ftr WHERE ft.type=$1 AND ft.food_type_id=ftr.food_type AND ftr.restaurant=res.restaurant_id', foodType)
-db.any('SELECT * FROM restaurant as res, food_type as ft, food_type_restaurant as ftr WHERE UPPER(ft.type) LIKE $1 AND ft.id_food_type=ftr.food_type AND ftr.restaurant=res.id_restaurant', '%'.concat(foodType.toUpperCase()).concat('%'))
+db.any('SELECT res.id_restaurant, res.name_restaurant, res.description, res.email, ft.id_food_type, ft.type ' 
+  + 'FROM restaurant as res, food_type as ft, food_type_restaurant as ftr ' 
+  + 'WHERE UPPER(ft.type) LIKE $1 AND ft.id_food_type=ftr.food_type AND ftr.restaurant=res.id_restaurant', 
+  '%'.concat(foodType.toUpperCase()).concat('%'))
 		.then(function (data) {
       res.status(200)
         .json(data);
@@ -103,7 +95,8 @@ function getRestaurantByPriceRange(req, res, next){
   var maxValue = parseInt(req.params.max);
   console.log(maxValue,minValue);
 	//db.any('SELECT res.name, res.address, res.score, res.phone FROM restaurant as res, menu WHERE menu.price >= $1 AND menu.price <= $2 AND menu.restaurant=res.restaurant_id', [minValue,maxValue])
-	db.any('SELECT * FROM restaurant as res, dish WHERE dish.price >= $1 AND dish.price <= $2 AND dish.restaurant=res.id_restaurant', [minValue,maxValue])
+	db.any('SELECT res.id_restaurant, res.name_restaurant, res.description, res.email FROM restaurant as res, dish '
+    + 'WHERE dish.price >= $1 AND dish.price <= $2 AND dish.restaurant=res.id_restaurant AND dish.type = 12', [minValue,maxValue])
     .then(function (data) {
       res.status(200)
         .json(data);
@@ -136,9 +129,6 @@ function getRestaurantsByCoordinates(req, res, next){
       return next(err);
     });
 }
-
-
- 
 
 
 module.exports={
