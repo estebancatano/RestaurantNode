@@ -21,7 +21,7 @@ var db = pgp(connectionString);
 //var db = pgp(cn);
 
 function getAllRestaurants(req,res,next){
-	db.any('SELECT * FROM restaurant')
+	db.any('SELECT id_restaurant, name_restaurant, description, email FROM restaurant')
 		.then(function(data){
 			res.status(200)
 				.json(data);
@@ -40,6 +40,17 @@ function getRestaurantByName(req, res, next) {
       .catch(function (err) {
         return next(err);
   });
+}
+
+function getFranchiseByRestaurant(req, res, next){
+  var restaurant = req.params.restaurant;
+  db.any('SELECT * FROM franchise WHERE restaurant = $1',restaurant)
+    .then(function (data){
+      res.status(200)
+        .json(data);
+    }).catch(function(err){
+      return next(err);
+    });
 }
 
 function getRestaurantByCity(req, res, next){
@@ -112,15 +123,18 @@ function getRestaurantsByCoordinates(req, res, next){
   var longitude = parseFloat(req.params.longitude);
   console.log(latitude,longitude);
   /*
-    Se utiliza La Formula de Haversine, 
-    para calcular la distancia de un punto a otro por latitud y longitud
-    por defecto trae los resstaurantes que esten a un kilometro a la redonda 
+    Se utiliza La Formula de Haversine, para calcular la distancia de un punto a otro por 
+    latitud y longitud por defecto trae los resstaurantes que esten a un kilometro a la redonda 
     se necesitaban 2 constantes que se quemaron en la query 
     6371 = valor de los kilometrops de la tierra 
     1 = numero de kiolometros a la redonda 
   */
-
-   db.any('Select * FROM (SELECT res.* , ( 6371 * ACOS(COS( RADIANS($1)) * COS(RADIANS(res.latitude))*COS(RADIANS(res.longitude) - RADIANS($2)) + SIN( RADIANS($3) )* SIN(RADIANS( res.latitude ) ) )) AS distance FROM restaurant AS res ) as t where distance < 1 ORDER BY distance ASC', [latitude,longitude,latitude])
+  /*t.id_franchise, t.name_franchise, t.restaurant, t.address, t.phone, t.latitude, t.longitude, t.open_time_week '
+    + 't.close_time_week, t.open_time_weekend, t.close_time_weekend*/
+   db.any('SELECT t.id_franchise, t.name_franchise, t.restaurant, t.address, t.phone, t.latitude, t.longitude, t.open_time_week, '
+    + 't.close_time_week, t.open_time_weekend, t.close_time_weekend FROM (SELECT fran.* , ( 6371 * ACOS(COS( RADIANS($1)) ' 
+    + '* COS(RADIANS(fran.latitude))*COS(RADIANS(fran.longitude) - RADIANS($2)) + SIN( RADIANS($3) )* SIN(RADIANS( fran.latitude)))) '
+    + 'AS distance FROM franchise AS fran ) as t where distance < 1 ORDER BY distance ASC', [latitude,longitude,latitude])
     .then(function (data) {
       res.status(200)
         .json(data);
@@ -134,6 +148,7 @@ function getRestaurantsByCoordinates(req, res, next){
 module.exports={
 	getAllRestaurants: getAllRestaurants,
 	getRestaurantByName: getRestaurantByName,
+  getFranchiseByRestaurant: getFranchiseByRestaurant,
 	getRestaurantByCity: getRestaurantByCity,
 	//getRestaurantByScore: getRestaurantByScore,
 	getRestaurantByFoodType: getRestaurantByFoodType,
