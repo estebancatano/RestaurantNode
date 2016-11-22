@@ -127,7 +127,6 @@ function validateClient(client){
 };
 
 function validateDelivery(client,delivery){
-
   return true;
   db.any('SELECT * FROM delivery d inner join user_restaurant usr on usr.id_user = d.delivery_user WHERE usr.username = $1 and d.id_delivery = $2', [client, delivery] )
     .then(function(data){

@@ -2,11 +2,12 @@ var express = require("express");
 var router = express.Router();
 
 var dbRestaurant = require('../queries/queriesRestaurant');
-router.get('/', dbRestaurant.getAllRestaurants);
-router.get('/:name', dbRestaurant.getRestaurantByName);
-router.get('/city/:cityName', dbRestaurant.getRestaurantByCity);
-router.get('/foodType/:foodType',dbRestaurant.getRestaurantByFoodType);
-router.get('/byprices/:min/:max',dbRestaurant.getRestaurantByPriceRange);
-router.get('/bycoordinates/:latitude/:longitude',dbRestaurant.getRestaurantsByCoordinates);
+router.get('/all', dbRestaurant.getAllRestaurants);
+router.get('/byName/:name', dbRestaurant.getRestaurantByName);
+router.get('/byCity/:cityName', dbRestaurant.getRestaurantByCity);
+//router.get('/score/:score', dbRestaurant.getRestaurantByScore);
+router.get('/byFoodType/:foodType',dbRestaurant.getRestaurantByFoodType);
+router.get('/byPrice/:min/:max',dbRestaurant.getRestaurantByPriceRange);
+router.get('/byCoordinates/:latitude/:longitude',dbRestaurant.getRestaurantsByCoordinates);
 
 module.exports = router;

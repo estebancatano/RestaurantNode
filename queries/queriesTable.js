@@ -6,8 +6,7 @@ var options = {
 
 var pgp = require('pg-promise')(options);
 //NUESTRA TEST
-var connectionString = 'postgres://nwedvvky:CEhVrCWQ5Rgy48A7ZPoa4EVu8QXbneF5@elmer.db.elephantsql.com:5432/nwedvvky';
-// var connectionString = 'postgres://ervocumi:b-Btk-9bg5tNtMU41eOnbstc8pd_J5No@elmer.db.elephantsql.com:5432/ervocumi';
+var connectionString = 'postgres://ervocumi:b-Btk-9bg5tNtMU41eOnbstc8pd_J5No@elmer.db.elephantsql.com:5432/ervocumi';
 //BD DE RESTAURANT
 //var connectionString = 'postgres://bqnkffou:qkuC7uBLuCmnH8WAXYIXrYHeFrlSVjs5@elmer.db.elephantsql.com:5432/bqnkffou';
 var db = pgp(connectionString);
@@ -84,6 +83,7 @@ function validateTable(table, amount, func, res){
 
 function getTablesByRestaurant(req, res, next){
   var franchise = req.params.franchise;
+  console.log(franchise);
   db.any('SELECT * FROM table_restaurant as tr WHERE tr.franchise = $1 AND tr.available = true', franchise)
     .then(function(data){
       res.status(200)
