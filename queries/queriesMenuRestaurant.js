@@ -44,9 +44,12 @@ function getByDateRangeReservation(req, res) {
         message: 'Debe ingresar correctamente la fecha final'
       });
   }
-  db.any('SELECT DISTINCT ON (name_dish) id_dish, name_dish, name_restaurant, amount FROM dish INNER JOIN restaurant as res ON' +
-	'(res.id_restaurant = dish.restaurant and res.id_restaurant=$1)  INNER JOIN order_restaurant as ord ON (ord.dish = dish.id_dish and ord.type = 1)' +
-	'INNER JOIN reservation as rsvt ON (ord.reservation=rsvt.id_reservation) where rsvt.date_init BETWEEN $2 AND $3;',[restaurant, date_init, date_end])
+  //DISTINCT ON (name_dish)
+  db.any('SELECT id_dish, name_dish, name_restaurant, name_franchise, amount, rsvt.date_init  as date FROM dish INNER JOIN ' + 
+    'restaurant as res ON (res.id_restaurant = dish.restaurant and res.id_restaurant=$1) INNER JOIN order_restaurant as ord ON ' +
+    '(ord.dish = dish.id_dish and ord.type = 1) INNER JOIN reservation as rsvt ON (ord.reservation=rsvt.id_reservation) INNER JOIN ' +
+    'table_restaurant as tbr ON (rsvt.table_restaurant = tbr.id_table_restaurant) INNER JOIN franchise as fran ON ' +
+    '(tbr.franchise = fran.id_franchise) where rsvt.date_init BETWEEN $2 AND $3;',[restaurant, date_init, date_end])
   .then(function(orders){
     res.status(200)
       .json(orders);

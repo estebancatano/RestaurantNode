@@ -123,20 +123,11 @@ function getRestaurantsByCoordinates(req, res, next){
   var longitude = parseFloat(req.params.longitude);
   console.log(latitude,longitude);
   /*
-<<<<<<< HEAD
-    Se utiliza La Formula de Haversine,
-    para calcular la distancia de un punto a otro por latitud y longitud
-    por defecto trae los resstaurantes que esten a un kilometro a la redonda
-    se necesitaban 2 constantes que se quemaron en la query
-    6371 = valor de los kilometrops de la tierra
-    1 = numero de kiolometros a la redonda
-=======
     Se utiliza La Formula de Haversine, para calcular la distancia de un punto a otro por 
     latitud y longitud por defecto trae los resstaurantes que esten a un kilometro a la redonda 
     se necesitaban 2 constantes que se quemaron en la query 
     6371 = valor de los kilometrops de la tierra 
     1 = numero de kiolometros a la redonda 
->>>>>>> 28e8649a3efe016eb6debbe129bd01c18d0e4cc6
   */
   /*t.id_franchise, t.name_franchise, t.restaurant, t.address, t.phone, t.latitude, t.longitude, t.open_time_week '
     + 't.close_time_week, t.open_time_weekend, t.close_time_weekend*/
