@@ -5,7 +5,7 @@ var routesTable = require('./routes/routesTable');
 var routesTest = require('./routes/routesTest');
 var routesDelivery = require('./routes/routesDelivery');
 var routesMenuRestaurant = require('./routes/routesMenuRestaurant');
-var cors = require('cors');
+//var cors = require('cors');
 
 var app = express();
 
@@ -17,11 +17,16 @@ app.listen(app.get('port'), function() {
 });
 
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 app.use('/api/restaurants/', routesRestaurant);
 app.use('/api/tables/',routesTable);
 app.use('/api/test/',routesTest);
 app.use('/api/delivery/',routesDelivery);
 app.use('/api/menuRestaurant/',routesMenuRestaurant);
-app.use(cors());
+//app.use(cors());
 
 module.exports = app;
