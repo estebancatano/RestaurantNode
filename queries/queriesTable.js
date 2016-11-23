@@ -86,6 +86,14 @@ function getAvailableTablesByFranchise(req, res, next){
   var date_init = req.params.init;
   var date_end = req.params.end;
   var capacity = req.params.capacity;
+  /*var dow = new Date(date_init);
+  if(dow > 0 && dow < 6) {
+    var open_time = 'open_time_week';
+    var close_time = 'close_time_week';
+  } else {
+    var open_time = 'open_time_weekend';
+    var close_time = 'close_time_weekend';
+  }*/
   console.log(franchise);
   if(date_init == 'undefined' || date_init == null){
     res.status(500)
@@ -108,6 +116,7 @@ function getAvailableTablesByFranchise(req, res, next){
         message: 'La fecha final debe ser posterior a la fecha inicial'
       });
   }
+
 //Faltan validaciones con la hora de cierre y apertura del restaurante
   db.any('SELECT tr.id_table_restaurant, tr.franchise, tr.capacity FROM table_restaurant AS tr LEFT OUTER JOIN reservation AS r ON (tr.id_table_restaurant = r.table_restaurant AND (r.date_end <= $2 OR r.date_init >= $3)) WHERE tr.available = true AND tr.franchise = $1 AND tr.capacity >= $4', [franchise, date_init, date_end, capacity])
     .then(function(data){
