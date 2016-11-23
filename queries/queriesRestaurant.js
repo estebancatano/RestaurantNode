@@ -21,8 +21,9 @@ var db = pgp(connectionString);
 //var db = pgp(cn);
 
 function getAllRestaurants(req,res,next){
-	db.any('SELECT id_restaurant, name_restaurant, description, email FROM restaurant')
-		.then(function(data){
+	//db.any('SELECT id_restaurant, name_restaurant, description, email FROM restaurant')
+	db.any('SELECT res.id_restaurant, res.name_restaurant, res.description, res.email FROM restaurant as res;')
+    .then(function(data){
 			res.status(200)
 				.json(data);
 		}).catch(function (err){
@@ -30,9 +31,23 @@ function getAllRestaurants(req,res,next){
 		});
 }
 
+function getFranchiseByRestaurant(req, res, next){
+  var restaurant = req.params.restaurant;
+  db.any('SELECT fran.id_franchise, fran.name_franchise, fran.address, fran.phone, fran.latitude, fran.longitude, ' +
+    'fran.open_time_week, fran.close_time_week, fran.open_time_weekend, fran.close_time_weekend, ci.id_city, ci.name_city ' +
+    'FROM franchise as fran, city as ci WHERE fran.restaurant = $1 AND fran.city = ci.id_city',restaurant)
+    .then(function (data){
+      res.status(200)
+        .json(data);
+    }).catch(function(err){
+      return next(err);
+    });
+}
+
 function getRestaurantByName(req, res, next) {
   var name = req.params.name;
-  db.any('SELECT * FROM restaurant WHERE UPPER(name_restaurant) LIKE $1', '%'.concat(name.toUpperCase()).concat('%'))
+  db.any('SELECT res.id_restaurant, res.name_restaurant, res.description, res.email FROM restaurant ' +
+    'WHERE UPPER(name_restaurant) LIKE $1', '%'.concat(name.toUpperCase()).concat('%'))
       .then(function (data) {
         res.status(200)
           .json(data);
@@ -40,17 +55,6 @@ function getRestaurantByName(req, res, next) {
       .catch(function (err) {
         return next(err);
   });
-}
-
-function getFranchiseByRestaurant(req, res, next){
-  var restaurant = req.params.restaurant;
-  db.any('SELECT * FROM franchise WHERE restaurant = $1',restaurant)
-    .then(function (data){
-      res.status(200)
-        .json(data);
-    }).catch(function(err){
-      return next(err);
-    });
 }
 
 function getRestaurantByCity(req, res, next){
@@ -132,9 +136,9 @@ function getRestaurantsByCoordinates(req, res, next){
   /*t.id_franchise, t.name_franchise, t.restaurant, t.address, t.phone, t.latitude, t.longitude, t.open_time_week '
     + 't.close_time_week, t.open_time_weekend, t.close_time_weekend*/
    db.any('SELECT t.id_franchise, t.name_franchise, t.restaurant, t.address, t.phone, t.latitude, t.longitude, t.open_time_week, '
-    + 't.close_time_week, t.open_time_weekend, t.close_time_weekend FROM (SELECT fran.* , ( 6371 * ACOS(COS( RADIANS($1)) ' 
+    + 't.close_time_week, t.open_time_weekend, t.close_time_weekend, ci.id_city,ci.name_city FROM (SELECT fran.* , ( 6371 * ACOS(COS( RADIANS($1)) ' 
     + '* COS(RADIANS(fran.latitude))*COS(RADIANS(fran.longitude) - RADIANS($2)) + SIN( RADIANS($3) )* SIN(RADIANS( fran.latitude)))) '
-    + 'AS distance FROM franchise AS fran ) as t where distance < 1 ORDER BY distance ASC', [latitude,longitude,latitude])
+    + 'AS distance FROM franchise AS fran) as t, city as ci WHERE distance < 1 AND t.city = ci.id_city ORDER BY distance ASC', [latitude,longitude,latitude])
     .then(function (data) {
       res.status(200)
         .json(data);
