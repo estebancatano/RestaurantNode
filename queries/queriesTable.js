@@ -81,10 +81,35 @@ function validateTable(table, amount, func, res){
   });
 }
 
-function getTablesByRestaurant(req, res, next){
+function getAvailableTablesByFranchise(req, res, next){
   var franchise = req.params.franchise;
+  var date_init = req.params.init;
+  var date_end = req.params.end;
+  var capacity = req.params.capacity;
   console.log(franchise);
-  db.any('SELECT * FROM table_restaurant as tr WHERE tr.franchise = $1 AND tr.available = true', franchise)
+  if(date_init == 'undefined' || date_init == null){
+    res.status(500)
+      .json({
+        status: 'Error',
+        message: 'Debe ingresar correctamente la fecha inicial'
+      });
+  }
+  if(date_end == 'undefined' || date_end == null){
+    res.status(500)
+      .json({
+        status: 'Error',
+        message: 'Debe ingresar correctamente la fecha final'
+      });
+  }
+  if(date_init >= date_end){
+    res.status(500)
+      .json({
+        status: 'Error',
+        message: 'La fecha final debe ser posterior a la fecha inicial'
+      });
+  }
+//Faltan validaciones con la hora de cierre y apertura del restaurante
+  db.any('SELECT tr.id_table_restaurant, tr.franchise, tr.capacity FROM table_restaurant AS tr LEFT OUTER JOIN reservation AS r ON (tr.id_table_restaurant = r.table_restaurant AND (r.date_end <= $2 OR r.date_init >= $3)) WHERE tr.available = true AND tr.franchise = $1 AND tr.capacity >= $4', [franchise, date_init, date_end, capacity])
     .then(function(data){
       res.status(200)
         .json(data);
@@ -95,5 +120,5 @@ function getTablesByRestaurant(req, res, next){
 
 module.exports={
   reserveTable: reserveTable,
-  getTablesByRestaurant: getTablesByRestaurant
+  getAvailableTablesByFranchise: getAvailableTablesByFranchise
 };
