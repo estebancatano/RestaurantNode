@@ -78,3 +78,78 @@ function changeReservationFranchise(req, res, next){
   }, 5000);
   
 }
+
+function validateReservation(reservation, franchise, func, res){
+	//var reserva1;
+	//console.log(reservation); 
+  db.one('SELECT * FROM reservation as r WHERE r.id_reservation = $1', reservation)
+  .then(function(data){
+
+  	func(data);
+  	/*console.log('vamos a buscar la franquicia'+ data[0]);
+
+  	 reserva1 = data[0]['table_restaurant'];
+  	db.one('SELECT tr.franchise FROM table_restaurant as tr WHERE tr.id_table_restaurant = $1', reserva1)
+		    .then(function (table_restaurant) {
+		      //Se consulta la franquicia de la mesa retornada por la consulta anterior
+		      console.log('vamos a buscar el restaurante');
+		      db.one('SELECT f.restaurant FROM franchise as f WHERE f.id_franchise = $1', table_restaurant[0]['franchise'])
+			    .then(function (franchise1) {		       
+			    		console.log('vamos a buscar el restaurante2')
+			      		db.one('SELECT f.restaurant FROM franchise as f WHERE f.id_franchise = $1', franchise)
+						    .then(function (franchise2) {
+						    	console.log('antes de comparar')
+						      if(franchise1[0]['restaurant'] !=franchise2[0]['restaurant']){
+						      		res.status(400)
+								        .json({
+								          status: 'Error',
+								          message: 'Las franquicias no corresponden al mismo restaurante'
+								        });
+						      }
+						    })
+						    .catch(function (err) {
+						      return next(err);
+						    });   
+			      
+			    })
+			    .catch(function (err) {
+			      return next(err);
+			    });
+		    })
+		    .catch(function (err) {
+		      return next(err);
+		    });*/
+		    
+    
+  })
+  .catch(function(err){
+    res.status(400)
+    .json({
+      status: 'Error',
+      message: 'Error al encontrar la reserva'
+    });
+  });
+}
+
+function validateFranchise(franchise, func, res){
+  db.one('SELECT * FROM franchise as f WHERE f.id_franchise = $1', franchise)
+  .then(function(franchise){
+    func(franchise);
+  })
+  .catch(function(err){
+    res.status(400)
+    .json({
+      status: 'Error',
+      message: 'Error al encontrar la franquicia'
+    });
+  });
+}
+
+
+
+
+
+module.exports={
+	changeReservationFranchise: changeReservationFranchise
+  //nombre a exportar: metodo a exportar,
+};
