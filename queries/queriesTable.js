@@ -120,6 +120,7 @@ function getAvailableTablesByFranchise(req, res, next){
 //Faltan validaciones con la hora de cierre y apertura del restaurante
   db.any('SELECT tr.id_table_restaurant, tr.franchise, tr.capacity FROM table_restaurant AS tr LEFT OUTER JOIN reservation AS r ON (tr.id_table_restaurant = r.table_restaurant AND (r.date_end <= $2 OR r.date_init >= $3)) WHERE tr.available = true AND tr.franchise = $1 AND tr.capacity >= $4', [franchise, date_init, date_end, capacity])
     .then(function(data){
+      //console.log(data);
       res.status(200)
         .json(data);
     }).catch(function (err){

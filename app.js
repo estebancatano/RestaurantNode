@@ -5,6 +5,8 @@ var routesTable = require('./routes/routesTable');
 var routesTest = require('./routes/routesTest');
 var routesDelivery = require('./routes/routesDelivery');
 var routesMenuRestaurant = require('./routes/routesMenuRestaurant');
+var routesReservation = require('./routes/routesReservation');
+
 //var cors = require('cors');
 
 var app = express();
@@ -27,6 +29,7 @@ app.use('/api/tables/',routesTable);
 app.use('/api/test/',routesTest);
 app.use('/api/delivery/',routesDelivery);
 app.use('/api/menuRestaurant/',routesMenuRestaurant);
+app.use('/api/reservation/',routesReservation);
 //app.use(cors());
 
 module.exports = app;
