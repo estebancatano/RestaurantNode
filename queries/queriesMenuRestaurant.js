@@ -31,37 +31,38 @@ function getByDateRangeReservation(req, res) {
 			console.log(restaurant);
 	}, res);
   if(date_init == 'undefined' || date_init == null){
-    res.status(500)
-      .json({
-        status: 'Error',
-        message: 'Debe ingresar correctamente la fecha inicial'
-      });
+    status = 500;
+		json = {
+			"status": "Error",
+			"message": "Debe ingresar correctamente la fecha inicial"
+		};
   }
   if(date_end == undefined || date_end == null){
-    res.status(500)
-      .json({
-        status: 'Error',
-        message: 'Debe ingresar correctamente la fecha final'
-      });
+    status = 500;
+    json = {
+        "status": "Error",
+        "message": "Debe ingresar correctamente la fecha final"
+      };
   }
   //DISTINCT ON (name_dish)
-  db.any('SELECT id_dish, name_dish, name_restaurant, name_franchise, amount, rsvt.date_init  as date FROM dish INNER JOIN ' + 
+  db.any('SELECT id_dish, name_dish, name_restaurant, name_franchise, amount, rsvt.date_init  as date FROM dish INNER JOIN ' +
     'restaurant as res ON (res.id_restaurant = dish.restaurant and res.id_restaurant=$1) INNER JOIN order_restaurant as ord ON ' +
     '(ord.dish = dish.id_dish and ord.type = 1) INNER JOIN reservation as rsvt ON (ord.reservation=rsvt.id_reservation) INNER JOIN ' +
     'table_restaurant as tbr ON (rsvt.table_restaurant = tbr.id_table_restaurant) INNER JOIN franchise as fran ON ' +
     '(tbr.franchise = fran.id_franchise) where rsvt.date_init BETWEEN $2 AND $3;',[restaurant, date_init, date_end])
   .then(function(orders){
-    res.status(200)
-      .json(orders);
+    status = 200;
+		json = orders;
   })
   .catch(function (err) {
-    res.status(400)
-    .json({
-      status: 'Error',
-      message: 'Error al buscar los menus reservados',
-      description: err
-    });
+    status = 400;
+    json = {
+      "status": "Error",
+      "message": "Error al buscar los menus reservados",
+      "description": err
+    };
   });
+	res.status(status).json(json);
 }
 
 function validateRestaurant(restaurant, func, res){
