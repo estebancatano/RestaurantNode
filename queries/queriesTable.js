@@ -31,7 +31,7 @@ function reserveTable(req, res, next) {
       state : 0
     };
 
-    validateClient(data, res);
+    validateOpenCloseTime(data, validateClient, res, 'table');
 }
 
 function validateClient(data, res) {
@@ -50,6 +50,7 @@ function validateClient(data, res) {
 
 function validateTable(data, res) {
   //Valida que la mesa esté disponible en la franja horaria elegida
+
   db.none('SELECT res.id_reservation AS nreservations FROM reservation AS res WHERE res.table_restaurant = $1 AND (res.date_end > $2 AND res.date_init < $3)', [data.table_restaurant, data.date_init, data.date_end])
   .then(function(result) {
       validateCapacity(data, res);
@@ -80,7 +81,6 @@ function validateCapacity(data, res) {
 
 
 function addReservation(data, res) {
-  //Función para agregar reserva
   db.none('INSERT INTO reservation(user_restaurant, table_restaurant, date_init, date_end, amount_people,state)' +
     'VALUES($1, $2, TIMESTAMP $3, $4, $5, $6)',
     [data.user_restaurant, data.table_restaurant, data.date_init, data.date_end, data.amount_people, data.state])
@@ -102,52 +102,121 @@ function addReservation(data, res) {
 }
 
 function getAvailableTablesByFranchise(req, res, next){
-  var franchise = req.params.franchise;
-  var date_init = req.params.init;
-  var date_end = req.params.end;
-  var capacity = req.params.capacity;
-  /*var dow = new Date(date_init);
-  if(dow > 0 && dow < 6) {
-    var open_time = 'open_time_week';
-    var close_time = 'close_time_week';
-  } else {
-    var open_time = 'open_time_weekend';
-    var close_time = 'close_time_weekend';
-  }*/
-  console.log(franchise);
-  if(date_init == 'undefined' || date_init == null){
+  data = {
+    franchise : req.params.franchise,
+    date_init : req.params.init,
+    date_end : req.params.end,
+    capacity : req.params.capacity,
+    next : next
+  }
+
+  validateOpenCloseTime(data, getAvailableTables, res, 'franchise');
+}
+
+function getAvailableTables(data, res) {
+  /*
+  db.any('SELECT tr.id_table_restaurant, tr.franchise, tr.capacity FROM table_restaurant AS tr, franchise AS f ' +
+        'WHERE tr.franchise = f.id_franchise AND tr.available = true AND tr.franchise = $1 AND tr.capacity >= $4 AND (TIME($2) NOT BETWEEN $5 AND $6 OR TIME($3) NOT BETWEEN $5 AND $6) AND tr.id_table_restaurant NOT IN(' +
+        'SELECT res.table_restaurant FROM reservation AS res WHERE $2 BETWEEN res.date_init AND res.date_end OR $3 BETWEEN res.date_init AND res.date_end)',
+  [data.franchise, data.date_init, data.date_end, data.capacity, closeOpenTimes.open_time, closeOpenTimes.close_time])*/
+  db.any('SELECT tr.id_table_restaurant, tr.franchise, tr.capacity FROM table_restaurant AS tr ' +
+        'WHERE tr.available = true AND tr.franchise = $1 AND tr.capacity >= $4 AND tr.id_table_restaurant NOT IN(' +
+        'SELECT res.table_restaurant FROM reservation AS res WHERE $2 BETWEEN res.date_init AND res.date_end OR $3 BETWEEN res.date_init AND res.date_end)',
+  [data.franchise, data.date_init, data.date_end, data.capacity])
+    .then(function(data){
+      res.status(200)
+        .json(data);
+    }).catch(function (err){
+      return data.next(err);
+    });
+}
+
+function validateTimes(data, func, res) {
+
+  if(data.date_init == 'undefined' || data.date_init == null){
     res.status(500)
       .json({
         status: 'Error',
         message: 'Debe ingresar correctamente la fecha inicial'
       });
-  }
-  if(date_end == 'undefined' || date_end == null){
+  } else if(data.date_end == 'undefined' || data.date_end == null){
     res.status(500)
       .json({
         status: 'Error',
         message: 'Debe ingresar correctamente la fecha final'
       });
-  }
-  if(date_init >= date_end){
+  } else if(data.date_init >= data.date_end){
     res.status(500)
       .json({
         status: 'Error',
         message: 'La fecha final debe ser posterior a la fecha inicial'
       });
+  } else {
+    func(data, res);
+  }
+}
+
+function validateOpenCloseTime(data, func, res, source) {
+  var query = '';
+  var param = '';
+
+  if (source == 'franchise') {
+    query = 'SELECT * FROM franchise WHERE id_franchise = $1'
+    param = data.franchise;
+    // Validar que la hora coincida con las horas de cierre y apertura del restaurante
+
+  } else if (source = 'table') {
+    query = 'SELECT DISTINCT open_time_week, close_time_week, open_time_weekend, close_time_weekend FROM franchise AS f, table_restaurant as tr WHERE f.id_franchise = $1'
+    param = data.table_restaurant;
   }
 
-//Faltan validaciones con la hora de cierre y apertura del restaurante
-  //db.any('SELECT tr.id_table_restaurant, tr.franchise, tr.capacity FROM table_restaurant AS tr INNER JOIN reservation AS r ON (tr.id_table_restaurant = r.table_restaurant AND (r.date_end <= $2 OR r.date_init >= $3)) WHERE tr.available = true AND tr.franchise = $1 AND tr.capacity >= $4', [franchise, date_init, date_end, capacity])
-  console.log(date_init);
-  db.any('SELECT tr.id_table_restaurant, tr.franchise, tr.capacity FROM table_restaurant AS tr WHERE tr.available = true AND tr.franchise = $1 AND tr.capacity >= $4 AND tr.id_table_restaurant NOT IN(SELECT res.table_restaurant FROM reservation AS res WHERE $2 BETWEEN res.date_init AND res.date_end OR $3 BETWEEN res.date_init AND res.date_end)', [franchise, date_init, date_end, capacity])
-    .then(function(data){
-      //console.log(data);
-      res.status(200)
-        .json(data);
-    }).catch(function (err){
-      return next(err);
-    });
+  db.one(query, [param])
+  .then(function(result) {
+    var init = new Date(data.date_init);
+    var end = new Date(data.date_end);
+    dow = init.getDay();
+    open_time = result.open_time_weekend,
+    close_time = result.close_time_weekend
+    if(dow > 0 && dow < 6) {
+      open_time = result.open_time_week,
+      close_time = result.close_time_week
+    }
+    hoursInit = init.getHours();
+    minutesInit = init.getMinutes();
+    hoursEnd = end.getHours();
+    minutesEnd = end.getMinutes();
+    hoursOpen = parseInt(open_time.substring(0,2));
+    minutesOpen = parseInt(open_time.substring(3,5));
+    hoursClose = parseInt(close_time.substring(0,2));
+    minutesClose = parseInt(close_time.substring(3,5));
+
+    console.log('Validando horario para cerrar y abrir');
+    console.log(hoursInit);
+    console.log(minutesInit);
+    console.log(hoursEnd);
+    console.log(minutesEnd);
+    console.log(hoursClose);
+    console.log(minutesClose);
+    console.log(hoursOpen);
+    console.log(minutesOpen);
+
+    if (hoursInit > hoursClose || hoursInit < hoursOpen || hoursEnd > hoursClose || hoursEnd > hoursClose ||
+       (hoursInit == hoursClose && minutesInit > minutesClose) ||
+       (hoursInit == hoursOpen && minutesInit < minutesClose) ||
+       (hoursEnd == hoursClose && minutesEnd > minutesClose) ||
+       (hoursEnd == hoursClose && minutesEnd < minutesClose)) {
+          res.status(500)
+          .json({
+            status: 'Error',
+            message: 'El restaurante está cerrado en el horario especificado'
+          });
+    } else {
+        validateTimes(data, func, res);
+    }
+  })
+  .catch(function (err){
+    console.log(err);
+  });
 }
 
 module.exports={
